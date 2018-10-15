@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
-from uploads.core.models import Document
-from uploads.core.forms import DocumentForm, ContactForm
+from uploads.core.forms import ContactForm
 
 import os
 import json
@@ -11,9 +10,6 @@ from collections import OrderedDict
 
 import paho.mqtt.client as mqtt
 
-def home(request):
-    documents = Document.objects.all()
-    return render(request, 'core/home.html', { 'documents': documents })
 
 def simple_upload(request):
 
@@ -41,18 +37,6 @@ def simple_upload(request):
             send_json_over_mqtt(json_data)
             return render(request, 'core/simple_upload.html', {'uploaded_file_url': uploaded_file_url, 'form': form})
     return render(request, 'core/simple_upload.html', {'form': form})
-
-def model_form_upload(request):
-    if request.method == 'POST':
-        form = DocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = DocumentForm()
-    return render(request, 'core/model_form_upload.html', {
-        'form': form
-    })
 
 def correct_json(json_data):
     result = "{\"respcode\":0,\"errorDesc\":\"\",\"data\":[{\n"
